@@ -49,6 +49,7 @@
 #include "klee/Support/FloatEvaluation.h"
 #include "klee/Support/ModuleUtil.h"
 #include "klee/Support/OptionCategories.h"
+#include "klee/Support/Debug.h"  // Add
 #include "klee/System/MemoryUsage.h"
 #include "klee/System/Time.h"
 
@@ -422,6 +423,13 @@ cl::opt<bool> DebugCheckForImpliedValues(
     cl::desc("Debug the implied value optimization"),
     cl::cat(DebugCat));
 
+// Add
+cl::opt<bool> DumpProcessTree(
+    "output-exec-tree", cl::init(false),
+    cl::desc("Dump execution tree into a csv file for tree visualization"),
+    cl::cat(DebugCat));
+// Add end
+
 } // namespace
 
 // XXX hack
@@ -507,6 +515,15 @@ Executor::Executor(LLVMContext &ctx, const InterpreterOptions &opts,
                  error.c_str());
     }
   }
+
+  // Add
+  if (DumpProcessTree) {
+    char name[32];
+    snprintf(name, sizeof(name), "ptree%08d.csv", (int)stats::instructions);
+    os = interpreterHandler->openOutputFile(name);
+    *os << "parent,child,location\n";
+    llvm::errs() << "line: 525\n";
+  } // Add end
 }
 
 llvm::Module *
@@ -903,6 +920,10 @@ void Executor::branch(ExecutionState &state,
       addedStates.push_back(ns);
       result.push_back(ns);
       processTree->attach(es->ptreeNode, ns, es);
+      if (DumpProcessTree) { // Add
+        llvm::errs() << "line: 864\n";
+        dumpPTreeCSV(es->ptreeNode->parent);
+      }  // Add end
     }
   }
 
@@ -1142,6 +1163,15 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
     }
 
     processTree->attach(current.ptreeNode, falseState, trueState);
+    // Add
+    if (DumpProcessTree) {
+      llvm::errs() << "line: 1168\n";
+      llvm::errs() << current.ptreeNode << "\n";
+      llvm::errs() << current.ptreeNode->parent << "\n";
+      llvm::errs() << current.ptreeNode->left.getPointer() << "\n";
+      llvm::errs() << current.ptreeNode->right.getPointer() << "\n";
+      dumpPTreeCSV(current.ptreeNode->parent);
+    } // Add end
 
     if (pathWriter) {
       // Need to update the pathOS.id field of falseState, otherwise the same id
@@ -1175,6 +1205,7 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
 }
 
 void Executor::addConstraint(ExecutionState &state, ref<Expr> condition) {
+  KLEE_DEBUG_WITH_TYPE("condition-dump", condition->dump());  // Add
   if (ConstantExpr *CE = dyn_cast<ConstantExpr>(condition)) {
     if (!CE->isTrue())
       llvm::report_fatal_error("attempt to add invalid constraint");
@@ -4603,6 +4634,23 @@ int *Executor::getErrnoLocation(const ExecutionState &state) const {
 #endif
 }
 
+// Add
+void Executor::dumpPTreeCSV(PTreeNode *node) {
+  llvm::errs() << "*node:         " << node << "\n";
+  llvm::errs() << "*node->parent: " << node->parent << "\n";
+  llvm::errs() << "*node->left  : " << node->left.getPointer() << "\n";
+  llvm::errs() << "*node->right : " << node->right.getPointer() << "\n";
+  assert(node && node->left.getPointer() && node->right.getPointer());
+
+  if (!::DumpProcessTree)
+    return;
+  
+  if (os) {
+    llvm::errs() << "line: 4649\n";
+    processTree->dumpCSV(node, *os);
+    llvm::errs() << "line: 4651\n";
+  }
+} // Add end
 
 void Executor::dumpPTree() {
   if (!::dumpPTree) return;

@@ -14,6 +14,8 @@
 #include "klee/Support/ErrorHandling.h"
 #include "llvm/ADT/PointerIntPair.h"
 
+#include <fstream> // Add
+
 namespace klee {
   class ExecutionState;
   class PTreeNode;
@@ -36,6 +38,11 @@ namespace klee {
     PTreeNode(const PTreeNode&) = delete;
     PTreeNode(PTreeNode *parent, ExecutionState *state);
     ~PTreeNode() = default;
+
+    // Add
+    static int nextIndex;
+    int creationIndex;
+    // Add end
   };
 
   class PTree {
@@ -51,6 +58,7 @@ namespace klee {
                 ExecutionState *rightState);
     void remove(PTreeNode *node);
     void dump(llvm::raw_ostream &os);
+    void dumpCSV(PTreeNode *parent, llvm::raw_ostream &os); // Add
     std::uint8_t getNextId() {
       std::uint8_t id = 1 << registeredIds++;
       if (registeredIds > PtrBitCount) {

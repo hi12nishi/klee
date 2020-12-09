@@ -225,6 +225,9 @@ private:
   /// Typeids used during exception handling
   std::vector<ref<Expr>> eh_typeids;
 
+  // Out CSV file to
+  std::unique_ptr<llvm::raw_fd_ostream> os;  // Add
+
   /// Return the typeid corresponding to a certain `type_info`
   ref<ConstantExpr> getEhTypeidFor(ref<Expr> type_info);
 
@@ -473,6 +476,7 @@ private:
   /// Only for debug purposes; enable via debugger or klee-control
   void dumpStates();
   void dumpPTree();
+  void dumpPTreeCSV(PTreeNode *node);  // Add
 
 public:
   Executor(llvm::LLVMContext &ctx, const InterpreterOptions &opts,

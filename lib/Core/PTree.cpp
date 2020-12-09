@@ -14,6 +14,7 @@
 #include "klee/Expr/Expr.h"
 #include "klee/Expr/ExprPPrinter.h"
 #include "klee/Support/OptionCategories.h"
+#include "klee/Module/KInstruction.h"  // Add
 
 #include <bitset>
 #include <vector>
@@ -91,6 +92,20 @@ void PTree::remove(PTreeNode *n) {
   }
 }
 
+// Add
+void PTree::dumpCSV(PTreeNode *parent, llvm::raw_ostream &os) {
+  assert(parent && parent->left.getPointer() && parent->right.getPointer());
+
+  auto left = parent->left.getPointer();
+  auto right = parent->right.getPointer();
+  
+  os << parent->creationIndex << "," << left->creationIndex << ","
+     << left->state->prevPC->getSourceLocation() << "\n";
+  os << parent->creationIndex << "," << right->creationIndex << ","
+     << right->state->prevPC->getSourceLocation() << "\n";
+}
+// Add end
+
 void PTree::dump(llvm::raw_ostream &os) {
   ExprPPrinter *pp = ExprPPrinter::create(os);
   pp->setNewline("\\l");
@@ -127,8 +142,18 @@ void PTree::dump(llvm::raw_ostream &os) {
   delete pp;
 }
 
-PTreeNode::PTreeNode(PTreeNode *parent, ExecutionState *state) : parent{parent}, state{state} {
+// Add change comment
+// PTreeNode::PTreeNode(PTreeNode *parent, ExecutionState *state) : parent{parent}, state{state} {
+//   state->ptreeNode = this;
+//   left = PTreeNodePtr(nullptr);
+//   right = PTreeNodePtr(nullptr);
+// }
+
+// Add
+int PTreeNode::nextIndex = 0;
+PTreeNode::PTreeNode(PTreeNode *parent, ExecutionState *state) : parent{parent}, state{state}, creationIndex{nextIndex++} {
   state->ptreeNode = this;
   left = PTreeNodePtr(nullptr);
   right = PTreeNodePtr(nullptr);
 }
+// Add end
