@@ -120,6 +120,12 @@ namespace {
                 cl::desc("Write .sym.path files for each test case (default=false)"),
                 cl::cat(TestCaseCat));
 
+  // Add
+  cl::opt<bool>
+  WritePrintExpr("write-print-expr",
+           cl::desc("Write the output of klee_print_expr() (default=false)"),
+           cl::cat(TestCaseCat));
+  // Add end
 
   /*** Startup options ***/
 
@@ -583,6 +589,18 @@ void KleeHandler::processTestCase(const ExecutionState &state,
         }
       }
     }
+
+    // Add
+    if (WritePrintExpr) {
+      std::vector<std::string> printexpr;
+      m_interpreter->getPrintExprLog(state, printexpr);
+      auto f = openTestFile("expr", id);
+      if (f) {
+        for (const auto &pe : printexpr) {
+          *f << pe;
+        }
+      }
+    } // Add end
 
     if (m_numGeneratedTests == MaxTests)
       m_interpreter->setHaltExecution(true);

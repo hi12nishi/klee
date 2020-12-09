@@ -93,16 +93,23 @@ void PTree::remove(PTreeNode *n) {
 }
 
 // Add
-void PTree::dumpCSV(PTreeNode *parent, llvm::raw_ostream &os) {
+void PTree::dumpCSV(PTreeNode *parent, llvm::raw_ostream &os, ref<Expr> condition, std::string &branchInst) {
   assert(parent && parent->left.getPointer() && parent->right.getPointer());
 
   auto left = parent->left.getPointer();
   auto right = parent->right.getPointer();
   
   os << parent->creationIndex << "," << left->creationIndex << ","
-     << left->state->prevPC->getSourceLocation() << "\n";
+     << left->state->prevPC->getSourceLocation() << ",\"\"\"";
+  Expr::createIsZero(condition)->print(os);  // falseState
+  os << "\"\"\",";
+  os << "\"\"\"" << branchInst << "\"\"\"\n";
+
   os << parent->creationIndex << "," << right->creationIndex << ","
-     << right->state->prevPC->getSourceLocation() << "\n";
+     << right->state->prevPC->getSourceLocation() << ",\"\"\"";
+  condition->print(os);  // trueState
+  os << "\"\"\",";
+  os << "\"\"\"" << branchInst << "\"\"\"\n";
 }
 // Add end
 

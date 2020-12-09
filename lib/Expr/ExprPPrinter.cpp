@@ -435,11 +435,13 @@ public:
   /* Public utility functions */
 
   void printSeparator(PrintContext &PC, bool simple, unsigned indent) {
-    if (simple || forceNoLineBreaks) {
-      PC << ' ';
-    } else {
-      PC.breakLine(indent);
-    }
+    PC << ' ';
+    // Add comment-out: To display expr and query in one-line. 
+    // if (simple || forceNoLineBreaks) {
+    //   PC << ' ';
+    // } else {
+    //   PC.breakLine(indent);
+    // }
   }
 };
 

@@ -476,7 +476,7 @@ private:
   /// Only for debug purposes; enable via debugger or klee-control
   void dumpStates();
   void dumpPTree();
-  void dumpPTreeCSV(PTreeNode *node);  // Add
+  void dumpPTreeCSV(PTreeNode *node, ref<Expr> condition, std::string &branchInst);  // Add
 
 public:
   Executor(llvm::LLVMContext &ctx, const InterpreterOptions &opts,
@@ -528,6 +528,9 @@ public:
   unsigned getPathStreamID(const ExecutionState &state) override;
 
   unsigned getSymbolicPathStreamID(const ExecutionState &state) override;
+
+  // Add
+  void getPrintExprLog(const ExecutionState &state, std::vector<std::string> &res) override;
 
   void getConstraintLog(const ExecutionState &state, std::string &res,
                         Interpreter::LogType logFormat =

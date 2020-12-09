@@ -150,6 +150,9 @@ public:
 
   virtual unsigned getSymbolicPathStreamID(const ExecutionState &state) = 0;
 
+  // Add
+  virtual void getPrintExprLog(const ExecutionState &state, std::vector<std::string> &res) = 0;
+
   virtual void getConstraintLog(const ExecutionState &state,
                                 std::string &res,
                                 LogType logFormat = STP) = 0;

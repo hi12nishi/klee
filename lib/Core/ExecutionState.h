@@ -235,6 +235,9 @@ public:
   /// @brief Disables forking for this state. Set by user code
   bool forkDisabled;
 
+  /// @brief Store the output of klee_print_expr
+  std::vector<std::string> exprList;  // Add
+
 public:
   #ifdef KLEE_UNITTEST
   // provide this function only in the context of unittests

@@ -567,6 +567,11 @@ void SpecialFunctionHandler::handlePrintExpr(ExecutionState &state,
 
   std::string msg_str = readStringAtAddress(state, arguments[0]);
   llvm::errs() << msg_str << ":" << arguments[1] << "\n";
+
+  std::string expr_str = msg_str + ":";  // Add
+  std::stringstream expr_ss;  // Add
+  expr_ss << arguments[1] << "$\n";  // Add
+  state.exprList.push_back(expr_str + expr_ss.str());  // Add
 }
 
 void SpecialFunctionHandler::handleSetForking(ExecutionState &state,

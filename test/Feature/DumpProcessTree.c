@@ -24,4 +24,4 @@ int main() {
   return 0;
 }
 // Check we find a line with the expected format
-// CHECK-CSV: parent,child,location
+// CHECK-CSV: parent,child,location,constraints,ir

@@ -521,8 +521,7 @@ Executor::Executor(LLVMContext &ctx, const InterpreterOptions &opts,
     char name[32];
     snprintf(name, sizeof(name), "ptree%08d.csv", (int)stats::instructions);
     os = interpreterHandler->openOutputFile(name);
-    *os << "parent,child,location\n";
-    llvm::errs() << "line: 525\n";
+    *os << "parent,child,location,constraints,ir\n";
   } // Add end
 }
 
@@ -921,8 +920,10 @@ void Executor::branch(ExecutionState &state,
       result.push_back(ns);
       processTree->attach(es->ptreeNode, ns, es);
       if (DumpProcessTree) { // Add
-        llvm::errs() << "line: 864\n";
-        dumpPTreeCSV(es->ptreeNode->parent);
+        std::string str;
+        llvm::raw_string_ostream ss(str);
+        ss << *(es->prevPC->inst);
+        dumpPTreeCSV(es->ptreeNode->parent, conditions[i], ss.str());
       }  // Add end
     }
   }
@@ -1165,12 +1166,11 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
     processTree->attach(current.ptreeNode, falseState, trueState);
     // Add
     if (DumpProcessTree) {
-      llvm::errs() << "line: 1168\n";
-      llvm::errs() << current.ptreeNode << "\n";
-      llvm::errs() << current.ptreeNode->parent << "\n";
-      llvm::errs() << current.ptreeNode->left.getPointer() << "\n";
-      llvm::errs() << current.ptreeNode->right.getPointer() << "\n";
-      dumpPTreeCSV(current.ptreeNode->parent);
+      //KLEE_DEBUG_WITH_TYPE("cond-dump", condition->dump());  // Add
+      std::string str;
+      llvm::raw_string_ostream ss(str);
+      ss << *(current.prevPC->inst);
+      dumpPTreeCSV(current.ptreeNode->parent, condition, ss.str());
     } // Add end
 
     if (pathWriter) {
@@ -4410,6 +4410,11 @@ unsigned Executor::getSymbolicPathStreamID(const ExecutionState &state) {
   return state.symPathOS.getID();
 }
 
+// Add
+void Executor::getPrintExprLog(const ExecutionState &state, std::vector<std::string> &res) {
+  res = state.exprList;
+} // Add end
+
 void Executor::getConstraintLog(const ExecutionState &state, std::string &res,
                                 Interpreter::LogType logFormat) {
 
@@ -4635,20 +4640,14 @@ int *Executor::getErrnoLocation(const ExecutionState &state) const {
 }
 
 // Add
-void Executor::dumpPTreeCSV(PTreeNode *node) {
-  llvm::errs() << "*node:         " << node << "\n";
-  llvm::errs() << "*node->parent: " << node->parent << "\n";
-  llvm::errs() << "*node->left  : " << node->left.getPointer() << "\n";
-  llvm::errs() << "*node->right : " << node->right.getPointer() << "\n";
+void Executor::dumpPTreeCSV(PTreeNode *node, ref<Expr> condition, std::string &branchInst) {
   assert(node && node->left.getPointer() && node->right.getPointer());
 
   if (!::DumpProcessTree)
     return;
   
   if (os) {
-    llvm::errs() << "line: 4649\n";
-    processTree->dumpCSV(node, *os);
-    llvm::errs() << "line: 4651\n";
+    processTree->dumpCSV(node, *os, condition, branchInst);
   }
 } // Add end
 

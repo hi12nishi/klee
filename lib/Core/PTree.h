@@ -58,7 +58,7 @@ namespace klee {
                 ExecutionState *rightState);
     void remove(PTreeNode *node);
     void dump(llvm::raw_ostream &os);
-    void dumpCSV(PTreeNode *parent, llvm::raw_ostream &os); // Add
+    void dumpCSV(PTreeNode *parent, llvm::raw_ostream &os, ref<Expr> condition, std::string &branchInst); // Add
     std::uint8_t getNextId() {
       std::uint8_t id = 1 << registeredIds++;
       if (registeredIds > PtrBitCount) {
