@@ -25,3 +25,10 @@ files, pipes, environment variables, and passing command line
 arguments.
 
 For further information, see the [webpage](http://klee.github.io/).
+
+## Added option (by hi12nishi)
+* -write-print-expr
+  - klee_print_expr関数で出力される計算式を実行パスごとに出力する(出力ファイル: test00000N.expr)
+* -output-exec-tree
+  - Kleeのprocess treeをダンプする
+  - KennyMacheka によるKleeのfork(print-csv-treeブランチ)の実装を元に作成 (https://github.com/KennyMacheka/klee/tree/print-csv-tree)
